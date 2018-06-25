@@ -55,7 +55,8 @@ trait UpdateModelTrait
         Console::output("Удалено старых записей: {$count}");
 
         static::getDb()->createCommand()->dropColumn($tTableName, 'previous_id')->execute();
-        $count = static::getDb()->createCommand("INSERT INTO {$tableName} SELECT tmp.* FROM {$tTableName} tmp")->execute();
+
+        $count = static::getDb()->createCommand("REPLACE INTO {$tableName} SELECT tmp.* FROM {$tTableName} tmp")->execute();
         Console::output("Добавлено новых записей: {$count}");
     }
 

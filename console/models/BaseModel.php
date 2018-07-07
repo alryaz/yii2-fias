@@ -8,12 +8,9 @@
 namespace solbianca\fias\console\models;
 
 use Yii;
+use solbianca\fias\console\base\Loader;
 use yii\base\Model;
 use yii\console\Exception;
-use yii\db\Connection;
-use yii\helpers\Console;
-use solbianca\fias\Module as Fias;
-use solbianca\fias\console\base\Loader;
 use solbianca\fias\models\FiasUpdateLog;
 
 abstract class BaseModel extends Model
@@ -32,11 +29,6 @@ abstract class BaseModel extends Model
      * @var string|null
      */
     protected $file;
-
-    /**
-     * @var Connection
-     */
-    protected $db;
 
     /**
      * @var \solbianca\fias\console\base\Directory
@@ -61,12 +53,10 @@ abstract class BaseModel extends Model
     {
         parent::__construct($config);
 
-        $this->db = Fias::db();
-
         $this->loader = $loader;
         $this->file = $file;
-
         $this->fileInfo = $loader->getLastFileInfo();
+
         $this->directory = $this->getDirectory($file, $this->loader, $this->fileInfo);
         $this->versionId = $this->getVersion($this->directory);
     }
@@ -78,7 +68,6 @@ abstract class BaseModel extends Model
      */
     protected function saveLog()
     {
-        Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  'Логируем.');
         if (!$log = FiasUpdateLog::findOne(['version_id' => $this->versionId])) {
             $log = new FiasUpdateLog();
             $log->version_id = $this->versionId;
@@ -105,7 +94,6 @@ abstract class BaseModel extends Model
             }
             $directory = $loader->wrapDirectory(Yii::getAlias($file));
         } else {
-            Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  "Скачивание последней версии полной БД ФИАС");
             $directory = $loader->loadInitFile($fileInfo);
         }
 

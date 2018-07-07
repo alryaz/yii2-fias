@@ -1,11 +1,10 @@
 <?php
 namespace solbianca\fias\console\traits;
 
+use solbianca\fias\models\FiasModelInterface;
 use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\Console;
-use solbianca\fias\Module as Fias;
-use solbianca\fias\models\FiasModelInterface;
 use solbianca\fias\console\base\XmlReader;
 
 /**
@@ -34,6 +33,7 @@ trait ImportModelTrait
     /**
      * @param XmlReader $reader
      * @param array $attributes
+     * @param bool $temporaryTable
      * @throws \yii\db\Exception
      */
     protected static function processImportRows(XmlReader $reader, $attributes)
@@ -52,10 +52,10 @@ trait ImportModelTrait
             if ($rows) {
                 $rows = implode("\n", $rows);
                 static::saveInFile($pathToFile, $rows);
-                $count += Fias::db()
-                    ->createCommand("LOAD DATA LOCAL INFILE '{$pathToFile}' INTO TABLE {$tableName} CHARACTER SET UTF8 ({$values})")
+                $count += static::getDb()
+                    ->createCommand("LOAD DATA LOCAL INFILE '{$pathToFile}' INTO TABLE {$tableName} ({$values})")
                     ->execute();
-                Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  "Inserted {$count} rows");
+                Console::output("Inserted {$count} rows");
             }
         }
     }

@@ -2,6 +2,7 @@
 namespace solbianca\fias\console\base;
 
 use solbianca\fias\helpers\FileHelper;
+use solbianca\fias\models\FiasUpdateLog;
 
 /**
  * Class Loader
@@ -26,11 +27,6 @@ class Loader
      * @var SoapResultWrapper
      */
     protected $fileInfoResult = null;
-
-    /**
-     * @var SoapResultWrapper
-     */
-    protected $allFilesInfoResult = null;
 
     /**
      * @param $wsdlUrl
@@ -69,44 +65,6 @@ class Loader
         $rawResult = $client->__soapCall('GetLastDownloadFileInfo', []);
 
         return new SoapResultWrapper($rawResult);
-    }
-
-    /**
-     * Get ALL fias base updates information: version and url's to download files
-     *
-     * @param int $fromVersion
-     * @return array
-     */
-    public function getAllFilesInfo($fromVersion = 0)
-    {
-        if (!$this->allFilesInfoResult) {
-            $this->allFilesInfoResult = $this->getAllFilesInfoRaw($fromVersion);
-        }
-
-        return $this->allFilesInfoResult;
-    }
-
-    /**
-     * Получает список всех версий, выпущенных после имеющейся у нас
-     * @param int $fromVersion
-     * @return array
-     */
-    protected function getAllFilesInfoRaw($fromVersion = 0)
-    {
-        $client = new \SoapClient($this->wsdlUrl);
-        $rawResult = $client->__soapCall('GetAllDownloadFileInfo', []);
-
-        /** @var \stdClass $update */
-        $updates = [];
-        foreach ($rawResult->GetAllDownloadFileInfoResult->DownloadFileInfo as $update) {
-            // эти обновления у нас уже есть
-            if ($update->VersionId <= $fromVersion) {
-                continue;
-            }
-            $updates[] = new SoapResultWrapper($update);
-        }
-
-        return $updates;
     }
 
     /**
@@ -164,10 +122,7 @@ class Loader
      */
     protected function addVersionId($pathToDirectory)
     {
-        // это подходит только когда применяется только одно последнее обновление
-        //$versionId = $this->getLastFileInfo()->getVersionId();
-        // версию вытаскиваем из названия файла обновления
-        $versionId = mb_ereg_replace('^([0-9]+)_.+$', '\\1', basename($pathToDirectory));
+        $versionId = $this->getLastFileInfo()->getVersionId();
         file_put_contents($pathToDirectory . '/VERSION_ID_' . $versionId, 'Версия: ' . $versionId);
     }
 

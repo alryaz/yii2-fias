@@ -15,10 +15,7 @@ class SoapResultWrapper
 
     public function __construct(\stdClass $rawResult)
     {
-        // сюда может быть передан уже готовый объект DownloadFileInfo (когда идем по списку версий)
-        if (!isset($rawResult->VersionId)) {
-            $rawResult = $rawResult->GetLastDownloadFileInfoResult;
-        }
+        $rawResult = $rawResult->GetLastDownloadFileInfoResult;
         $this->versionId = $rawResult->VersionId;
         $this->initFileUrl = $rawResult->FiasCompleteXmlUrl;
         $this->updateFileUrl = $rawResult->FiasDeltaXmlUrl;

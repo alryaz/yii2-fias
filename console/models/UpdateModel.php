@@ -55,32 +55,35 @@ class UpdateModel extends BaseModel
             return;
         }
 
-        if (false === $this->loader->isUpdateRequired($currentVersion->version_id)) {
-            Console::output('База в актуальном состоянии');
+        $updates = $this->loader->getAllFilesInfo($currentVersion->version_id);
+
+        if (empty($updates)) {
+            Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  'База в актуальном состоянии');
             return;
         }
 
-        Console::output("Вы хотите выполнить обновление с версии {$currentVersion->version_id} на {$this->fileInfo->getVersionId()}");
-
-        $this->deleteFiasData();
-
-        $transaction = Yii::$app->getDb()->beginTransaction();
-
-        try {
-            Yii::$app->getDb()->createCommand('SET foreign_key_checks = 0;')->execute();
-
-            $this->updateAddressObject();
-
-            $this->updateHouse();
-
-            $this->saveLog();
-
-            Yii::$app->getDb()->createCommand('SET foreign_key_checks = 1;')->execute();
-            $transaction->commit();
-        } catch (\Exception $e) {
-            $transaction->rollBack();
-            throw $e;
+        foreach ($updates as $update) {
+            $this->fileInfo = $update;
+            $this->directory = $this->getDirectory($this->file, $this->loader, $this->fileInfo);
+            $this->versionId = $this->getVersion($this->directory);
+            Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  "Обновление с версии {$currentVersion->version_id} до {$this->fileInfo->getVersionId()}");
+            $this->deleteFiasData();
+            $transaction = Yii::$app->getDb()->beginTransaction();
+            try {
+                Yii::$app->getDb()->createCommand('SET foreign_key_checks = 0;')->execute();
+                $this->updateAddressObject();
+                $this->updateHouse();
+                $this->saveLog();
+                Yii::$app->getDb()->createCommand('SET foreign_key_checks = 1;')->execute();
+                $transaction->commit();
+                // меняем текущую версию для отображения
+                $currentVersion->version_id = $this->fileInfo->getVersionId();
+            } catch (\Exception $e) {
+                $transaction->rollBack();
+                throw $e;
+            }
         }
+
     }
 
     private function deleteFiasData()

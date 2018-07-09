@@ -2,7 +2,7 @@
 namespace solbianca\fias\console\base;
 
 use solbianca\fias\helpers\FileHelper;
-use solbianca\fias\models\FiasUpdateLog;
+use yii\base\Component;
 
 /**
  * Class Loader
@@ -10,18 +10,18 @@ use solbianca\fias\models\FiasUpdateLog;
  *
  * Обертка для загрузки базы на сервер
  */
-class Loader
+class Loader extends Component
 {
     /**
      * @var string
      */
-    protected $wsdlUrl;
+    public $wsdlUrl;
 
     /**
      * Directory to upload file
      * @var string
      */
-    protected $fileDirectory;
+    public $fileDirectory;
 
     /**
      * @var SoapResultWrapper
@@ -34,18 +34,16 @@ class Loader
     protected $allFilesInfoResult = null;
 
     /**
-     * @param $wsdlUrl
-     * @param $fileDirectory
      * @throws \yii\base\InvalidConfigException
      */
-    public function __construct($wsdlUrl, $fileDirectory)
+    public function init()
     {
-        $this->wsdlUrl = $wsdlUrl;
-        $this->fileDirectory = $fileDirectory;
-
-        FileHelper::ensureIsDirectory($fileDirectory);
-        FileHelper::ensureIsWritable($fileDirectory);
+        parent::init();
+        $this->fileDirectory = \Yii::getAlias($this->fileDirectory);
+        FileHelper::ensureIsDirectory($this->fileDirectory);
+        FileHelper::ensureIsWritable($this->fileDirectory);
     }
+
 
     /**
      * Get actual fias base information: version and url's to download files

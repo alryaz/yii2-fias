@@ -1,0 +1,7 @@
+actor: FunctionalTester
+modules:
+    enabled:
+        - \Helper\Functional
+        - Yii2:
+            part: [orm, fixtures]
+            configFile: 'tests/config/test.php'

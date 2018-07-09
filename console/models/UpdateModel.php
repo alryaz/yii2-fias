@@ -6,12 +6,12 @@
 
 namespace solbianca\fias\console\models;
 
-use Yii;
 use solbianca\fias\console\base\XmlReader;
-use yii\helpers\Console;
-use solbianca\fias\models\FiasUpdateLog;
-use solbianca\fias\models\FiasHouse;
 use solbianca\fias\models\FiasAddressObject;
+use solbianca\fias\models\FiasHouse;
+use solbianca\fias\models\FiasUpdateLog;
+use Yii;
+use yii\helpers\Console;
 
 class UpdateModel extends BaseModel
 {
@@ -21,6 +21,7 @@ class UpdateModel extends BaseModel
      * @param $file
      * @param \solbianca\fias\console\base\Loader $loader
      * @param \solbianca\fias\console\base\SoapResultWrapper $fileInfo
+     *
      * @return \solbianca\fias\console\base\Directory
      */
     protected function getDirectory($file, $loader, $fileInfo)
@@ -50,31 +51,35 @@ class UpdateModel extends BaseModel
         /** @var FiasUpdateLog $currentVersion */
         $currentVersion = FiasUpdateLog::find()->orderBy('id desc')->limit(1)->one();
 
-        if (!$currentVersion) {
+        if ( ! $currentVersion) {
             Console::output('База не инициализированна, выполните копанду: php yii fias/install');
+
             return;
         }
 
         $updates = $this->loader->getAllFilesInfo($currentVersion->version_id);
 
         if (empty($updates)) {
-            Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  'База в актуальном состоянии');
+            Console::output(Yii::$app->formatter->asDateTime(time(),
+                    'php:Y-m-d H:i:s') . ' ' . 'База в актуальном состоянии');
+
             return;
         }
 
         foreach ($updates as $update) {
-            $this->fileInfo = $update;
+            $this->fileInfo  = $update;
             $this->directory = $this->getDirectory($this->file, $this->loader, $this->fileInfo);
             $this->versionId = $this->getVersion($this->directory);
-            Console::output(Yii::$app->formatter->asDateTime(time(), 'php:Y-m-d H:i:s').' '.  "Обновление с версии {$currentVersion->version_id} до {$this->fileInfo->getVersionId()}");
+            Console::output(Yii::$app->formatter->asDateTime(time(),
+                    'php:Y-m-d H:i:s') . ' ' . "Обновление с версии {$currentVersion->version_id} до {$this->fileInfo->getVersionId()}");
             $this->deleteFiasData();
-            $transaction = Yii::$app->getDb()->beginTransaction();
+            $transaction = $this->db->beginTransaction();
             try {
-                Yii::$app->getDb()->createCommand('SET foreign_key_checks = 0;')->execute();
+                $this->db->createCommand('SET foreign_key_checks = 0;')->execute();
                 $this->updateAddressObject();
                 $this->updateHouse();
                 $this->saveLog();
-                Yii::$app->getDb()->createCommand('SET foreign_key_checks = 1;')->execute();
+                $this->db->createCommand('SET foreign_key_checks = 1;')->execute();
                 $transaction->commit();
                 // меняем текущую версию для отображения
                 $currentVersion->version_id = $this->fileInfo->getVersionId();
@@ -117,7 +122,7 @@ class UpdateModel extends BaseModel
     {
         Console::output('Обновление адресов обектов');
 
-        $attributes = FiasAddressObject::getXmlAttributes();
+        $attributes           = FiasAddressObject::getXmlAttributes();
         $attributes['PREVID'] = 'previous_id';
 
         FiasAddressObject::updateRecords(new XmlReader(
@@ -132,7 +137,7 @@ class UpdateModel extends BaseModel
     {
         Console::output('Обновление домов');
 
-        $attributes = FiasHouse::getXmlAttributes();
+        $attributes           = FiasHouse::getXmlAttributes();
         $attributes['PREVID'] = 'previous_id';
 
         FiasHouse::updateRecords(new XmlReader(

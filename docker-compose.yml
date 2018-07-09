@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  php:
+    build:
+      context: .
+      args:
+        - uid=${uid}
+        - gid=${gid}
+    volumes:
+      - .:/usr/src/yii2-fias
+  mysql:
+    image: mysql:5.7.22
+    command: mysqld --character-set-server=utf8 --init-connect='SET NAMES UTF8;'
+    environment:
+      MYSQL_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: yii2-fias
+    ports:
+      - '5603:3306'

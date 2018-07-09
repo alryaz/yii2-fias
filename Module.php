@@ -2,7 +2,7 @@
 
 namespace solbianca\fias;
 
-use Yii;
+use solbianca\fias\console\base\Loader;
 
 /**
  * Class Module
@@ -12,22 +12,14 @@ use Yii;
  */
 class Module extends \yii\base\Module
 {
-    /**
-     * Directory for fias files
-     *
-     * @var string
-     */
-    private $directory;
 
-    /**
-     * @inherit
-     */
-    public function init()
-    {
-        parent::init();
-
-        $this->directory = Yii::getAlias('@app/runtime/fias');
-    }
+    public $components = [
+        'loader' => [
+            'class'         => Loader::class,
+            'wsdlUrl'       => 'http://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL',
+            'fileDirectory' => '@app/runtime/fias',
+        ]
+    ];
 
     /**
      * @return string

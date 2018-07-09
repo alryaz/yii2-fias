@@ -7,28 +7,36 @@
 
 namespace solbianca\fias\console\models;
 
-use Yii;
 use solbianca\fias\console\base\Loader;
+use solbianca\fias\models\FiasUpdateLog;
+use solbianca\fias\Module;
+use Yii;
 use yii\base\Model;
 use yii\console\Exception;
-use solbianca\fias\models\FiasUpdateLog;
+use yii\db\Connection;
+use yii\di\Instance;
 
 abstract class BaseModel extends Model
 {
+    /**
+     * @var string|null
+     */
+    public $file;
+
     /**
      * @var Loader
      */
     protected $loader;
 
     /**
+     * @var Connection
+     */
+    protected $db;
+
+    /**
      * @var \solbianca\fias\console\base\SoapResultWrapper
      */
     protected $fileInfo;
-
-    /**
-     * @var string|null
-     */
-    protected $file;
 
     /**
      * @var \solbianca\fias\console\base\Directory
@@ -43,23 +51,19 @@ abstract class BaseModel extends Model
     protected $versionId;
 
     /**
-     * @inherit
-     *
-     * @param Loader $loader
-     * @param string|null $file
-     * @param array $config
+     * @throws \yii\base\InvalidConfigException
+     * @throws Exception
      */
-    public function __construct(Loader $loader, $file = null, $config = [])
+    public function init()
     {
-        parent::__construct($config);
-
-        $this->loader = $loader;
-        $this->file = $file;
-        $this->fileInfo = $loader->getLastFileInfo();
-
-        $this->directory = $this->getDirectory($file, $this->loader, $this->fileInfo);
+        parent::init();
+        $this->loader    = Instance::ensure('loader', Loader::class, Module::getInstance());
+        $this->db        = Instance::ensure('db', Connection::class, Module::getInstance());
+        $this->fileInfo  = $this->loader->getLastFileInfo();
+        $this->directory = $this->getDirectory($this->file, $this->loader, $this->fileInfo);
         $this->versionId = $this->getVersion($this->directory);
     }
+
 
     abstract function run();
 
@@ -68,8 +72,8 @@ abstract class BaseModel extends Model
      */
     protected function saveLog()
     {
-        if (!$log = FiasUpdateLog::findOne(['version_id' => $this->versionId])) {
-            $log = new FiasUpdateLog();
+        if ( ! $log = FiasUpdateLog::findOne(['version_id' => $this->versionId])) {
+            $log             = new FiasUpdateLog();
             $log->version_id = $this->versionId;
         }
 
@@ -83,13 +87,14 @@ abstract class BaseModel extends Model
      * @param $file
      * @param $loader Loader
      * @param $fileInfo \solbianca\fias\console\base\SoapResultWrapper
+     *
      * @return \solbianca\fias\console\base\Directory
      * @throws Exception
      */
     protected function getDirectory($file, $loader, $fileInfo)
     {
         if (null !== $file) {
-            if (!file_exists($file)) {
+            if ( ! file_exists($file)) {
                 throw new Exception("File {$file} do not exist.");
             }
             $directory = $loader->wrapDirectory(Yii::getAlias($file));
@@ -104,7 +109,9 @@ abstract class BaseModel extends Model
      * Get fias base version
      *
      * @param $directory \solbianca\fias\console\base\Directory
+     *
      * @return string
+     * @throws Exception
      */
     protected function getVersion($directory)
     {

@@ -2,12 +2,11 @@
 namespace solbianca\fias\console\controllers;
 
 use solbianca\fias\console\base\Loader;
+use solbianca\fias\console\models\UpdateModel;
 use solbianca\fias\helpers\FileHelper;
 use solbianca\fias\console\models\ImportModel;
-use solbianca\fias\console\models\UpdateModel;
-use Yii;
 use yii\console\Controller;
-use yii\console\Exception;
+use yii\di\Instance;
 use yii\helpers\Console;
 
 class FiasController extends Controller
@@ -17,49 +16,42 @@ class FiasController extends Controller
      * If given parameter $file is null try to download full file, else try to use given file.
      *
      * @param string|null $file
-     * @throws Exception
      * @throws \Exception
-     * @throws \yii\db\Exception
      */
     public function actionInstall($file = null)
     {
-        $loader = $this->getLoader();
-
-        return (new ImportModel($loader, $file))->run();
+        $importModel = Instance::ensure([
+            'file' => $file
+        ], ImportModel::class, $this->module);
+        $importModel->run();
     }
 
     /**
      * Update fias data in base
      *
      * @param string|null $file
+     *
      * @throws \Exception
-     * @throws \yii\db\Exception
      */
     public function actionUpdate($file = null)
     {
-        $loader = $this->getLoader();
-
-        return (new UpdateModel($loader, $file))->run();
+        $updateModel = Instance::ensure([
+            'file' => $file
+        ], UpdateModel::class, $this->module);
+        $updateModel->run();
     }
 
     /**
+     * @throws \yii\base\InvalidConfigException
      * Clear directory for upload/extract files
      */
     public function actionClearDirectory()
     {
-        $directory = Yii::$app->getModule('fias')->directory;
+        /** @var Loader $loader */
+        $loader = Instance::ensure('loader', Loader::class, $this->module);
+        $directory = $loader->fileDirectory;
         FileHelper::clearDirectory($directory);
         Console::output("Очистка директории '{$directory}' завершена.");
     }
 
-    /**
-     * @return Loader
-     */
-    protected function getLoader()
-    {
-        return new Loader(
-            'http://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL',
-            Yii::$app->getModule('fias')->directory
-        );
-    }
 }

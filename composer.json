@@ -17,6 +17,7 @@
     }
   ],
   "require": {
+    "ext-soap": "*",
     "yiisoft/yii2": "*",
     "yiisoft/yii2-jui": "^2.0"
   },
@@ -24,5 +25,8 @@
     "psr-4": {
       "solbianca\\fias\\": ""
     }
+  },
+  "require-dev": {
+    "codeception/codeception": "^2.4"
   }
 }

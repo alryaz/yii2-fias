@@ -15,7 +15,6 @@ class SoapResultWrapper
 
     public function __construct(\stdClass $rawResult)
     {
-        $rawResult = $rawResult->GetLastDownloadFileInfoResult;
         $this->versionId = $rawResult->VersionId;
         $this->initFileUrl = $rawResult->FiasCompleteXmlUrl;
         $this->updateFileUrl = $rawResult->FiasDeltaXmlUrl;

@@ -68,7 +68,7 @@ class Loader
     {
         $client = new \SoapClient($this->wsdlUrl);
         $rawResult = $client->__soapCall('GetLastDownloadFileInfo', []);
-
+        $rawResult = $rawResult->GetLastDownloadFileInfoResult;
         return new SoapResultWrapper($rawResult);
     }
 

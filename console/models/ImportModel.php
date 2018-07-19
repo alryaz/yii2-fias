@@ -73,7 +73,7 @@ class ImportModel extends BaseModel
             FiasAddressObject::XML_OBJECT_KEY,
             array_keys(FiasAddressObject::getXmlAttributes()),
             FiasAddressObject::getXmlFilters()
-        ));
+        ), null, $this->loader->fileDirectory);
     }
 
     /**
@@ -87,7 +87,7 @@ class ImportModel extends BaseModel
             FiasHouse::XML_OBJECT_KEY,
             array_keys(FiasHouse::getXmlAttributes()),
             FiasHouse::getXmlFilters()
-        ));
+        ), null, $this->loader->fileDirectory);
     }
 
     /**
@@ -102,8 +102,7 @@ class ImportModel extends BaseModel
                 FiasAddressObjectLevel::XML_OBJECT_KEY,
                 array_keys(FiasAddressObjectLevel::getXmlAttributes()),
                 FiasAddressObjectLevel::getXmlFilters()
-            )
-        );
+        ), null, $this->loader->fileDirectory);
     }
 
     /**

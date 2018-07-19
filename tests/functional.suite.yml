@@ -4,4 +4,4 @@ modules:
         - \Helper\Functional
         - Yii2:
             part: [orm, fixtures]
-            configFile: 'tests/config/test.php'
+            configFile: 'tests/_app/config/console-test.php'

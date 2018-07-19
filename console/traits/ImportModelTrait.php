@@ -2,7 +2,6 @@
 namespace solbianca\fias\console\traits;
 
 use solbianca\fias\models\FiasModelInterface;
-use Yii;
 use yii\db\ActiveRecord;
 use yii\helpers\Console;
 use solbianca\fias\console\base\XmlReader;
@@ -18,14 +17,16 @@ trait ImportModelTrait
     /**
      * @param XmlReader $reader
      * @param array|null $attributes
+     * @param $directory
+     *
      * @throws \yii\db\Exception
      */
-    public static function import(XmlReader $reader, $attributes = null)
+    public static function import(XmlReader $reader, $attributes = null, $directory)
     {
         if (is_null($attributes)) {
             $attributes = static::getXmlAttributes();
         }
-        static::processImportRows($reader, $attributes);
+        static::processImportRows($reader, $attributes, $directory);
         static::importCallback();
     }
 
@@ -33,15 +34,16 @@ trait ImportModelTrait
     /**
      * @param XmlReader $reader
      * @param array $attributes
-     * @param bool $temporaryTable
+     * @param $directory
+     *
      * @throws \yii\db\Exception
      */
-    protected static function processImportRows(XmlReader $reader, $attributes)
+    protected static function processImportRows(XmlReader $reader, $attributes, $directory)
     {
         $count = 0;
         $tableName = static::tableName();
         $values = implode(', ', array_values($attributes));
-        $pathToFile = Yii::$app->getModule('fias')->directory . DIRECTORY_SEPARATOR . static::$importFile;
+        $pathToFile = $directory . DIRECTORY_SEPARATOR . static::$importFile;
         $pathToFile = str_replace('\\', '/', $pathToFile);
 
         while ($data = $reader->getRows()) {

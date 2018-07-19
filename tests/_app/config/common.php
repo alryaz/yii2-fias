@@ -3,6 +3,11 @@
 return [
     'id' => 'yii2-fias',
     'basePath' => __DIR__ . '/..',
+    'aliases'             => [
+        '@bower' => '@vendor/bower-asset',
+        '@npm'   => '@vendor/npm-asset',
+    ],
+    'vendorPath' => __DIR__ . '/../../../vendor',
     'components' => [
         'db' => [
             'class' => \yii\db\Connection::class,
@@ -12,11 +17,4 @@ return [
             'charset' => 'utf8'
         ],
     ],
-    'controllerMap' => [
-        'migrate' => [
-            'class' => \yii\console\controllers\MigrateController::class,
-            'migrationPath' => __DIR__ . '/../../migrations'
-        ]
-    ]
 ];
-

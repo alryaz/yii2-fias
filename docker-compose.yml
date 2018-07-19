@@ -9,6 +9,10 @@ services:
         - gid=${gid}
     volumes:
       - .:/usr/src/yii2-fias
+    ports:
+      - '8000:80'
+    environment:
+      XDEBUG_CONFIG: ${XDEBUG_CONFIG}
   mysql:
     image: mysql:5.7.22
     command: mysqld --character-set-server=utf8 --init-connect='SET NAMES UTF8;'

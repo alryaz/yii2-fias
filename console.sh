@@ -3,4 +3,4 @@
 export uid=$(id -u)
 export gid=$(id -g)
 
-docker-compose run --rm --user $UID:$GID php sh
+docker-compose exec --user $UID:$GID php bash

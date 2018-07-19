@@ -20,6 +20,7 @@ class FiasController extends Controller
      */
     public function actionInstall($file = null)
     {
+        /** @var ImportModel $importModel */
         $importModel = Instance::ensure([
             'file' => $file
         ], ImportModel::class, $this->module);
@@ -35,6 +36,7 @@ class FiasController extends Controller
      */
     public function actionUpdate($file = null)
     {
+        /** @var UpdateModel $updateModel */
         $updateModel = Instance::ensure([
             'file' => $file
         ], UpdateModel::class, $this->module);

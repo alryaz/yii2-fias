@@ -10,8 +10,11 @@ defined('YII_ENV') or define('YII_ENV', 'test');
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
 
-$config = require __DIR__ . '/tests/config/test.php';
+$config = \yii\helpers\ArrayHelper::merge(
+    require __DIR__ . '/tests/_app/config/common.php',
+    require __DIR__ . '/tests/_app/config/console.php'
+);
 
 $application = new yii\console\Application($config);
-$exitCode = $application->run();
+$exitCode    = $application->run();
 exit($exitCode);

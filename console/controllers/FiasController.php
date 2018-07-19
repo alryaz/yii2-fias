@@ -1,10 +1,11 @@
 <?php
+
 namespace solbianca\fias\console\controllers;
 
 use solbianca\fias\console\base\Loader;
-use solbianca\fias\console\models\UpdateModel;
+use solbianca\fias\console\components\ImportFiasComponent;
+use solbianca\fias\console\components\UpdateFiasComponent;
 use solbianca\fias\helpers\FileHelper;
-use solbianca\fias\console\models\ImportModel;
 use yii\console\Controller;
 use yii\di\Instance;
 use yii\helpers\Console;
@@ -16,31 +17,26 @@ class FiasController extends Controller
      * If given parameter $file is null try to download full file, else try to use given file.
      *
      * @param string|null $file
+     *
      * @throws \Exception
      */
     public function actionInstall($file = null)
     {
-        /** @var ImportModel $importModel */
-        $importModel = Instance::ensure([
-            'file' => $file
-        ], ImportModel::class, $this->module);
-        $importModel->run();
+        /** @var ImportFiasComponent $import */
+        $import = Instance::ensure('importFias', ImportFiasComponent::class, $this->module);
+        $import->import($file);
     }
 
     /**
      * Update fias data in base
      *
-     * @param string|null $file
-     *
      * @throws \Exception
      */
-    public function actionUpdate($file = null)
+    public function actionUpdate()
     {
-        /** @var UpdateModel $updateModel */
-        $updateModel = Instance::ensure([
-            'file' => $file
-        ], UpdateModel::class, $this->module);
-        $updateModel->run();
+        /** @var UpdateFiasComponent $update */
+        $update = Instance::ensure('updateFias', UpdateFiasComponent::class, $this->module);
+        $update->update();
     }
 
     /**
@@ -50,10 +46,11 @@ class FiasController extends Controller
     public function actionClearDirectory()
     {
         /** @var Loader $loader */
-        $loader = Instance::ensure('loader', Loader::class, $this->module);
+        $loader    = Instance::ensure('loader', Loader::class, $this->module);
         $directory = $loader->fileDirectory;
         FileHelper::clearDirectory($directory);
-        Console::output("Очистка директории '{$directory}' завершена.");
+        Console::output("Очистка каталога '{$directory}' завершена.");
+
     }
 
 }

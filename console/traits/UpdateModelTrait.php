@@ -17,6 +17,8 @@ trait UpdateModelTrait
     /**
      * @param XmlReader $reader
      * @param array|null $attributes
+     *
+     * @throws \yii\db\Exception
      */
     public static function updateRecords(XmlReader $reader, $attributes = null)
     {
@@ -27,6 +29,12 @@ trait UpdateModelTrait
         static::updateCallback();
     }
 
+    /**
+     * @param XmlReader $reader
+     * @param $attributes
+     *
+     * @throws \yii\db\Exception
+     */
     public static function processUpdateRows(XmlReader $reader, $attributes)
     {
         $tTableName = static::temporaryTableName();

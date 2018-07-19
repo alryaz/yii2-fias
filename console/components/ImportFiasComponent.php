@@ -4,8 +4,10 @@
  * Модель для импорта данных из базы fias в mysql базу
  */
 
-namespace solbianca\fias\console\models;
+namespace solbianca\fias\console\components;
 
+use solbianca\fias\console\base\Directory;
+use solbianca\fias\console\base\SoapResultWrapper;
 use solbianca\fias\console\base\XmlReader;
 use solbianca\fias\console\events\ImportEvent;
 use solbianca\fias\models\FiasAddressObject;
@@ -14,7 +16,7 @@ use solbianca\fias\models\FiasHouse;
 use yii\db\Exception;
 use yii\helpers\Console;
 
-class ImportModel extends BaseModel
+class ImportFiasComponent extends FiasComponent
 {
 
     const EVENT_BEFORE_IMPORT = 'beforeImport';
@@ -22,54 +24,66 @@ class ImportModel extends BaseModel
     const EVENT_AFTER_IMPORT = 'afterImport';
 
     /**
-     * @throws \Exception
+     * @param SoapResultWrapper $fileInfo
+     *
+     * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
-    public function run()
+    protected function loadFile(SoapResultWrapper $fileInfo)
     {
-        return $this->import();
+        return $this->loader->loadInitFile($fileInfo);
     }
 
     /**
      * Import fias data in base
      *
-     * @throws \Exception
-     * @throws \yii\db\Exception
+     * @param null $file
+     *
+     * @throws \yii\console\Exception
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
      */
-    public function import()
+    public function import($file = null)
     {
-        try {
-            $this->db->createCommand('SET foreign_key_checks = 0;')->execute();
 
-            $this->trigger(self::EVENT_BEFORE_IMPORT, new ImportEvent($this->db));
+        $directory = $this->getDirectory($this->loader->getLastFileInfo(), $file);
 
-            $this->dropIndexes();
+        $this->db->createCommand('SET foreign_key_checks = 0;')->execute();
 
-            $this->importAddressObjectLevel();
+        $this->trigger(self::EVENT_BEFORE_IMPORT, new ImportEvent($this->db));
 
-            $this->importAddressObject();
+        $this->dropIndexes();
 
-            $this->importHouse();
+        $this->importAddressObjectLevel($directory);
 
-            $this->addIndexes();
+        $this->importAddressObject($directory);
 
-            $this->trigger(self::EVENT_AFTER_IMPORT, new ImportEvent($this->db));
+        $this->importHouse($directory);
 
-            $this->saveLog();
+        $this->addIndexes();
 
-            $this->db->createCommand('SET foreign_key_checks = 1;')->execute();
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        $this->trigger(self::EVENT_AFTER_IMPORT, new ImportEvent($this->db));
+
+        $this->saveLog($directory->getVersionId());
+
+        $this->db->createCommand('SET foreign_key_checks = 1;')->execute();
+
     }
 
     /**
      * Import fias address object
+     *
+     * @param Directory $directory
+     *
+     * @throws Exception
+     * @throws \yii\console\Exception
+     * @throws \yii\base\InvalidConfigException
      */
-    private function importAddressObject()
+    private function importAddressObject(Directory $directory)
     {
-        Console::output('Импорт адресов обектов');
+        Console::output('Импорт адресов объектов');
         FiasAddressObject::import(new XmlReader(
-            $this->directory->getAddressObjectFile(),
+            $directory->getAddressObjectFile(),
             FiasAddressObject::XML_OBJECT_KEY,
             array_keys(FiasAddressObject::getXmlAttributes()),
             FiasAddressObject::getXmlFilters()
@@ -78,12 +92,18 @@ class ImportModel extends BaseModel
 
     /**
      * Import fias house
+     *
+     * @param Directory $directory
+     *
+     * @throws Exception
+     * @throws \yii\console\Exception
+     * @throws \yii\base\InvalidConfigException
      */
-    private function importHouse()
+    private function importHouse(Directory $directory)
     {
         Console::output('Импорт домов');
         FiasHouse::import(new XmlReader(
-            $this->directory->getHouseFile(),
+            $directory->getHouseFile(),
             FiasHouse::XML_OBJECT_KEY,
             array_keys(FiasHouse::getXmlAttributes()),
             FiasHouse::getXmlFilters()
@@ -92,33 +112,27 @@ class ImportModel extends BaseModel
 
     /**
      * Import fias address object levels
+     *
+     * @param Directory $directory
+     *
+     * @throws Exception
+     * @throws \yii\console\Exception
+     * @throws \yii\base\InvalidConfigException
      */
-    private function importAddressObjectLevel()
+    private function importAddressObjectLevel(Directory $directory)
     {
         Console::output('Импорт типов адресных объектов (условные сокращения и уровни подчинения)');
         FiasAddressObjectLevel::import(
             new XmlReader(
-                $this->directory->getAddressObjectLevelFile(),
+                $directory->getAddressObjectLevelFile(),
                 FiasAddressObjectLevel::XML_OBJECT_KEY,
                 array_keys(FiasAddressObjectLevel::getXmlAttributes()),
                 FiasAddressObjectLevel::getXmlFilters()
         ), null, $this->loader->fileDirectory);
     }
 
-    /**
-     * Get fias base version
-     *
-     * @param $directory \solbianca\fias\console\base\Directory
-     *
-     * @return string
-     */
-    protected function getVersion($directory)
-    {
-        return $this->fileInfo->getVersionId();
-    }
 
     /**
-     * @throws \yii\db\Exception
      *
      * Сбрасываем индексы для таблиц данных фиас
      */
@@ -215,7 +229,6 @@ class ImportModel extends BaseModel
      * @param $name
      * @param $table
      *
-     * @throws \yii\db\Exception
      */
     private function dropPrimaryKeyIfExists($name, $table)
     {

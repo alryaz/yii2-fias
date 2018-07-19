@@ -3,6 +3,8 @@
 namespace solbianca\fias;
 
 use solbianca\fias\console\base\Loader;
+use solbianca\fias\console\components\ImportFiasComponent;
+use solbianca\fias\console\components\UpdateFiasComponent;
 
 /**
  * Class Module
@@ -18,6 +20,12 @@ class Module extends \yii\base\Module
             'class'         => Loader::class,
             'wsdlUrl'       => 'http://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL',
             'fileDirectory' => '@app/runtime/fias',
+        ],
+        'importFias' => [
+            'class' => ImportFiasComponent::class
+        ],
+        'updateFias' => [
+            'class' => UpdateFiasComponent::class
         ]
     ];
 

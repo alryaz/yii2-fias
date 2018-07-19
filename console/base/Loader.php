@@ -105,7 +105,10 @@ class Loader extends Component
 
     /**
      * @param $path
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
+     * @throws \Exception
      */
     protected function wrap($path)
     {
@@ -168,7 +171,9 @@ class Loader extends Component
 
     /**
      * @param SoapResultWrapper $filesInfo
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
     public function loadInitFile(SoapResultWrapper $filesInfo)
     {
@@ -177,7 +182,9 @@ class Loader extends Component
 
     /**
      * @param SoapResultWrapper $filesInfo
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
     public function loadUpdateFile(SoapResultWrapper $filesInfo)
     {
@@ -187,7 +194,9 @@ class Loader extends Component
     /**
      * @param string $filename
      * @param string $url
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
     private function load($filename, $url)
     {
@@ -196,11 +205,23 @@ class Loader extends Component
         );
     }
 
+    /**
+     * @param $file
+     *
+     * @return Directory
+     * @throws \yii\base\InvalidConfigException
+     */
     public function wrapFile($file)
     {
         return $this->wrap($file);
     }
 
+    /**
+     * @param $pathToDirectory
+     *
+     * @return Directory
+     * @throws \yii\base\InvalidConfigException
+     */
     public function wrapDirectory($pathToDirectory)
     {
         return new Directory($pathToDirectory);
@@ -210,7 +231,7 @@ class Loader extends Component
      * Get ALL fias base updates information: version and url's to download files
      *
      * @param int $fromVersion
-     * @return array
+     * @return SoapResultWrapper[]
      */
     public function getAllFilesInfo($fromVersion = 0)
     {

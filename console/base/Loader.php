@@ -15,13 +15,13 @@ class Loader extends Component
     /**
      * @var string
      */
-    public $wsdlUrl;
+    public $wsdlUrl = 'http://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL';
 
     /**
      * Directory to upload file
      * @var string
      */
-    public $fileDirectory;
+    public $fileDirectory = '@app/runtime/fias';
 
     /**
      * @var SoapResultWrapper

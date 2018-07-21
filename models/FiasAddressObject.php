@@ -4,6 +4,7 @@ namespace solbianca\fias\models;
 
 use solbianca\fias\console\traits\DeleteModelTrait;
 use solbianca\fias\console\traits\UpdateModelTrait;
+use solbianca\fias\Module;
 use yii\db\ActiveRecord;
 use solbianca\fias\console\traits\ImportModelTrait;
 
@@ -267,5 +268,14 @@ class FiasAddressObject extends ActiveRecord implements FiasModelInterface
             default:
                 return trim($this->prefix . '. ' . $this->title);
         }
+    }
+
+    /**
+     * @return null|object|\yii\db\Connection
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function getDb()
+    {
+        return Module::getInstance()->get('db');
     }
 }

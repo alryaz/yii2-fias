@@ -27,7 +27,6 @@
     }
   },
   "require-dev": {
-    "codeception/codeception": "^2.4",
-    "mongosoft/yii2-soap-server": "*"
+    "codeception/codeception": "^2.4"
   }
 }

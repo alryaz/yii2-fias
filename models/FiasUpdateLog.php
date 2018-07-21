@@ -2,6 +2,7 @@
 
 namespace solbianca\fias\models;
 
+use solbianca\fias\Module;
 use Yii;
 
 /**
@@ -19,6 +20,15 @@ class FiasUpdateLog extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return '{{%fias_update_log}}';
+    }
+
+    /**
+     * @return null|object|\yii\db\Connection
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function getDb()
+    {
+        return Module::getInstance()->get('db');
     }
 
     /**

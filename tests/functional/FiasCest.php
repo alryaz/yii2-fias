@@ -11,8 +11,25 @@ class FiasCest
     {
     }
 
-    // tests
-    public function tryToTest(FunctionalTester $I)
+    public function testInstall(FunctionalTester $I)
     {
+        $I->haveFixtures([
+            \solbianca\fias\tests\_fixtures\FiasUpdateLogFixture::class,
+            \solbianca\fias\tests\_fixtures\FiasAddressObjectFixture::class,
+            \solbianca\fias\tests\_fixtures\FiasHouseFixture::class,
+            \solbianca\fias\tests\_fixtures\FiasAddressObjectLevelFixture::class
+        ]);
+        \Yii::$app->runAction('fias/install');
+    }
+
+
+    public function testUpdate(FunctionalTester $I)
+    {
+        $I->haveFixtures([
+            \solbianca\fias\tests\_fixtures\FiasUpdateLogFixture::class,
+            \solbianca\fias\tests\_fixtures\FiasAddressObjectFixture::class,
+            \solbianca\fias\tests\_fixtures\FiasHouseFixture::class
+        ]);
+        \Yii::$app->runAction('fias/update');
     }
 }

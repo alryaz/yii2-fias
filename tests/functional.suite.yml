@@ -5,3 +5,5 @@ modules:
         - Yii2:
             part: [orm, fixtures]
             configFile: 'tests/_app/config/console-test.php'
+            cleanup: false
+        - Cli

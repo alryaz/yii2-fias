@@ -6,6 +6,7 @@ use solbianca\fias\console\base\Loader;
 use solbianca\fias\console\components\ImportFiasComponent;
 use solbianca\fias\console\components\UpdateFiasComponent;
 use solbianca\fias\helpers\FileHelper;
+use solbianca\fias\Module;
 use yii\console\Controller;
 use yii\di\Instance;
 use yii\helpers\Console;
@@ -23,7 +24,7 @@ class FiasController extends Controller
     public function actionInstall($file = null)
     {
         /** @var ImportFiasComponent $import */
-        $import = Instance::ensure('importFias', ImportFiasComponent::class, $this->module);
+        $import = Instance::ensure('importFias', ImportFiasComponent::class, Module::getInstance());
         $import->import($file);
     }
 
@@ -35,7 +36,7 @@ class FiasController extends Controller
     public function actionUpdate()
     {
         /** @var UpdateFiasComponent $update */
-        $update = Instance::ensure('updateFias', UpdateFiasComponent::class, $this->module);
+        $update = Instance::ensure('updateFias', UpdateFiasComponent::class, Module::getInstance());
         $update->update();
     }
 

@@ -2,6 +2,7 @@
 
 namespace solbianca\fias\models;
 
+use solbianca\fias\Module;
 use Yii;
 use solbianca\fias\console\traits\ImportModelTrait;
 use yii\db\ActiveRecord;
@@ -127,5 +128,14 @@ class FiasAddressObjectLevel extends ActiveRecord implements FiasModelInterface
         }
 
         return null;
+    }
+
+    /**
+     * @return null|object|\yii\db\Connection
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function getDb()
+    {
+        return Module::getInstance()->get('db');
     }
 }

@@ -19,3 +19,5 @@ WORKDIR /usr/src/yii2-fias
 VOLUME /usr/src/yii2-fias
 RUN rm /var/www/html
 RUN ln -s /usr/src/yii2-fias/tests/_app/web /var/www/html || true
+
+RUN curl -LO https://www.rarlab.com/rar/unrar_5.2.5-0.1_amd64.deb && dpkg -i unrar_5.2.5-0.1_amd64.deb && rm unrar_5.2.5-0.1_amd64.deb

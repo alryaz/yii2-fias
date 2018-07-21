@@ -14,7 +14,10 @@ return [
             'dsn' => 'mysql:host=mysql;dbname=yii2-fias',
             'username' => 'root',
             'password' => '1',
-            'charset' => 'utf8'
+            'charset' => 'utf8',
+            'attributes' => [
+                (string) PDO::MYSQL_ATTR_LOCAL_INFILE => true
+            ]
         ],
     ],
 ];

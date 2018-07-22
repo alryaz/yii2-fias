@@ -13,6 +13,7 @@ use solbianca\fias\console\events\ImportEvent;
 use solbianca\fias\models\FiasAddressObject;
 use solbianca\fias\models\FiasAddressObjectLevel;
 use solbianca\fias\models\FiasHouse;
+use solbianca\fias\models\FiasUpdateLog;
 use yii\db\Exception;
 use yii\helpers\Console;
 
@@ -250,6 +251,7 @@ class ImportFiasComponent extends FiasComponent
         FiasAddressObjectLevel::deleteAll();
         FiasAddressObject::deleteAll();
         FiasHouse::deleteAll();
+        FiasUpdateLog::deleteAll();
     }
 
 }

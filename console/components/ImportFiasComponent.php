@@ -55,9 +55,9 @@ class ImportFiasComponent extends FiasComponent
 
         $this->trigger(self::EVENT_BEFORE_IMPORT, new ImportEvent($this->db));
 
-        $this->dropIndexes();
-
         $this->dropData();
+
+        $this->dropIndexes();
 
         $this->importAddressObjectLevel($directory);
 

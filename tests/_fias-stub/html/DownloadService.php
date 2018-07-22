@@ -25,7 +25,7 @@ if (isset($_REQUEST['WSDL'])) {
             'FiasCompleteDbfUrl' => '',
             'FiasCompleteXmlUrl' => 'http://fias-stub/ver1-full.rar',
             'FiasDeltaDbfUrl'    => '',
-            'FiasDeltaXmlUrl'    => 'http://fias-stub/ver1-delta.rar',
+            'FiasDeltaXmlUrl'    => '',
             'Kladr4ArjUrl'       => '',
             'Kladr47ZUrl'        => ''
         ];
@@ -34,7 +34,7 @@ if (isset($_REQUEST['WSDL'])) {
             'VersionId'          => 2,
             'TextVersion'        => '2',
             'FiasCompleteDbfUrl' => '',
-            'FiasCompleteXmlUrl' => 'http://fias-stub/ver2-full.rar',
+            'FiasCompleteXmlUrl' => '',
             'FiasDeltaDbfUrl'    => '',
             'FiasDeltaXmlUrl'    => 'http://fias-stub/ver2-delta.rar',
             'Kladr4ArjUrl'       => '',

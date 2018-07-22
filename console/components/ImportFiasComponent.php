@@ -37,22 +37,26 @@ class ImportFiasComponent extends FiasComponent
     /**
      * Import fias data in base
      *
-     * @param null $file
+     * @param null|string $file
      *
-     * @throws \yii\console\Exception
+     * @param null|int $version
+     *
      * @throws Exception
      * @throws \yii\base\InvalidConfigException
+     * @throws \yii\console\Exception
      */
-    public function import($file = null)
+    public function import($file = null, $version = null)
     {
 
-        $directory = $this->getDirectory($this->loader->getLastFileInfo(), $file);
+        $directory = $this->getDirectory($this->loader->getVersionFileInfo($version), $file);
 
         $this->db->createCommand('SET foreign_key_checks = 0;')->execute();
 
         $this->trigger(self::EVENT_BEFORE_IMPORT, new ImportEvent($this->db));
 
         $this->dropIndexes();
+
+        $this->dropData();
 
         $this->importAddressObjectLevel($directory);
 
@@ -237,6 +241,15 @@ class ImportFiasComponent extends FiasComponent
         } catch (Exception $ignored) {
 
         }
+    }
+
+
+
+    private function dropData()
+    {
+        FiasAddressObjectLevel::deleteAll();
+        FiasAddressObject::deleteAll();
+        FiasHouse::deleteAll();
     }
 
 }

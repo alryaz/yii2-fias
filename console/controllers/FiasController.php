@@ -19,25 +19,33 @@ class FiasController extends Controller
      *
      * @param string|null $file
      *
-     * @throws \Exception
+     * @param null $version
+     *
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\console\Exception
+     * @throws \yii\db\Exception
      */
-    public function actionInstall($file = null)
+    public function actionInstall($file = null, $version = null)
     {
         /** @var ImportFiasComponent $import */
         $import = Instance::ensure('importFias', ImportFiasComponent::class, Module::getInstance());
-        $import->import($file);
+        $import->import($file, $version);
     }
 
     /**
      * Update fias data in base
      *
-     * @throws \Exception
+     * @param null|int $fromVersion
+     *
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\console\Exception
+     * @throws \yii\db\Exception
      */
-    public function actionUpdate()
+    public function actionUpdate($fromVersion = null)
     {
         /** @var UpdateFiasComponent $update */
         $update = Instance::ensure('updateFias', UpdateFiasComponent::class, Module::getInstance());
-        $update->update();
+        $update->update($fromVersion);
     }
 
     /**

@@ -26,12 +26,12 @@ class Loader extends Component
     /**
      * @var SoapResultWrapper
      */
-    protected $fileInfoResult = null;
+    protected $fileInfoResult;
 
     /**
      * @var SoapResultWrapper
      */
-    protected $allFilesInfoResult = null;
+    protected $allFilesInfoResult = [];
 
     /**
      * @throws \yii\base\InvalidConfigException
@@ -106,11 +106,12 @@ class Loader extends Component
     /**
      * @param $path
      *
+     * @param $version
+     *
      * @return Directory
      * @throws \yii\base\InvalidConfigException
-     * @throws \Exception
      */
-    protected function wrap($path)
+    protected function wrap($path, $version)
     {
         $pathToDirectory = glob($path . '_*');
         if ($pathToDirectory) {
@@ -118,17 +119,17 @@ class Loader extends Component
         } else {
             $pathToDirectory = Dearchiver::extract($this->fileDirectory, $path);
         }
-        $this->addVersionId($pathToDirectory);
+        $this->addVersionId($pathToDirectory, $version);
 
         return new Directory($pathToDirectory);
     }
 
     /**
      * @param $pathToDirectory
+     * @param $versionId
      */
-    protected function addVersionId($pathToDirectory)
+    protected function addVersionId($pathToDirectory, $versionId)
     {
-        $versionId = $this->getLastFileInfo()->getVersionId();
         file_put_contents($pathToDirectory . '/VERSION_ID_' . $versionId, 'Версия: ' . $versionId);
     }
 
@@ -177,7 +178,7 @@ class Loader extends Component
      */
     public function loadInitFile(SoapResultWrapper $filesInfo)
     {
-        return $this->load($filesInfo->getInitFileName(), $filesInfo->getInitFileUrl());
+        return $this->load($filesInfo->getInitFileName(), $filesInfo->getInitFileUrl(), $filesInfo->getVersionId());
     }
 
     /**
@@ -188,32 +189,24 @@ class Loader extends Component
      */
     public function loadUpdateFile(SoapResultWrapper $filesInfo)
     {
-        return $this->load($filesInfo->getUpdateFileName(), $filesInfo->getUpdateFileUrl());
+        return $this->load($filesInfo->getUpdateFileName(), $filesInfo->getUpdateFileUrl(), $filesInfo->getVersionId());
     }
 
     /**
      * @param string $filename
      * @param string $url
      *
-     * @return Directory
-     * @throws \yii\base\InvalidConfigException
-     */
-    private function load($filename, $url)
-    {
-        return $this->wrap(
-            $this->loadFile($filename, $url)
-        );
-    }
-
-    /**
-     * @param $file
+     * @param $version
      *
      * @return Directory
      * @throws \yii\base\InvalidConfigException
      */
-    public function wrapFile($file)
+    private function load($filename, $url, $version)
     {
-        return $this->wrap($file);
+        return $this->wrap(
+            $this->loadFile($filename, $url),
+            $version
+        );
     }
 
     /**
@@ -235,10 +228,10 @@ class Loader extends Component
      */
     public function getAllFilesInfo($fromVersion = 0)
     {
-        if (!$this->allFilesInfoResult) {
-            $this->allFilesInfoResult = $this->getAllFilesInfoRaw($fromVersion);
+        if (!isset($this->allFilesInfoResult[$fromVersion])) {
+            $this->allFilesInfoResult[$fromVersion] = $this->getAllFilesInfoRaw($fromVersion);
         }
-        return $this->allFilesInfoResult;
+        return $this->allFilesInfoResult[$fromVersion];
     }
     /**
      * Получает список всех версий, выпущенных после имеющейся у нас
@@ -259,6 +252,26 @@ class Loader extends Component
             $updates[] = new SoapResultWrapper($update);
         }
         return $updates;
+    }
+
+    public function getVersionFileInfo($version = null)
+    {
+
+        if (null === $version) {
+            return $this->getLastFileInfo();
+        }
+
+        $allFilesInfo = $this->getAllFilesInfo();
+
+        foreach ($allFilesInfo as $info) {
+
+            if ($info->getVersionId() == $version) {
+                return $info;
+            }
+        }
+
+        throw new \DomainException('Версия не найдена.');
+
     }
 
 }

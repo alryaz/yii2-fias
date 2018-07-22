@@ -31,31 +31,38 @@ class UpdateFiasComponent extends FiasComponent
 
 
     /**
+     * @param null|int $fromVersion
+     *
      * @throws \yii\base\InvalidConfigException
      * @throws \yii\console\Exception
      * @throws \yii\db\Exception
      */
-    public function update()
+    public function update($fromVersion = null)
     {
-        /** @var FiasUpdateLog $currentVersion */
-        $currentVersion = FiasUpdateLog::find()->orderBy('id desc')->limit(1)->one();
 
-        if ( ! $currentVersion) {
-            Console::output('База не инициализированна, выполните команду: php yii fias/install');
+        if ($fromVersion === null) {
+            /** @var FiasUpdateLog $currentVersion */
+            $currentVersion = FiasUpdateLog::find()->orderBy('id desc')->limit(1)->one();
 
-            return;
+            if ( ! $currentVersion) {
+                Console::output('База не инициализированна, выполните команду: php yii fias/install');
+
+                return;
+            }
+
+            $updates = $this->loader->getAllFilesInfo($currentVersion->version_id);
+            $updateVersion = $currentVersion->version_id;
+
+        } else {
+            $updates = $this->loader->getAllFilesInfo($fromVersion);
+            $updateVersion = $fromVersion;
         }
-
-        $updates = $this->loader->getAllFilesInfo($currentVersion->version_id);
 
         if (empty($updates)) {
             Console::output(Yii::$app->formatter->asDateTime(time(),
                     'php:Y-m-d H:i:s') . ' ' . 'База в актуальном состоянии');
-
             return;
         }
-
-        $updateVersion = $currentVersion->version_id;
 
         foreach ($updates as $update) {
 

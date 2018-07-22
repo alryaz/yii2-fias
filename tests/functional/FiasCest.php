@@ -68,4 +68,10 @@ class FiasCest
         $I->seeRecord(FiasUpdateLog::class, ['version_id' => 3]);
 
     }
+
+
+    public function testClearDirectory(FunctionalTester $I)
+    {
+        \Yii::$app->runAction('fias/clear-directory');
+    }
 }

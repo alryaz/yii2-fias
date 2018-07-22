@@ -55,7 +55,7 @@ class FiasController extends Controller
     public function actionClearDirectory()
     {
         /** @var Loader $loader */
-        $loader    = Instance::ensure('loader', Loader::class, $this->module);
+        $loader    = Instance::ensure('loader', Loader::class, Module::getInstance());
         $directory = $loader->fileDirectory;
         FileHelper::clearDirectory($directory);
         Console::output("Очистка каталога '{$directory}' завершена.");

@@ -206,7 +206,7 @@ class ImportFiasComponent extends FiasComponent
      * @param $name
      * @param $table
      */
-    private function dropForeignKeyIfExists($name, $table)
+    protected function dropForeignKeyIfExists($name, $table)
     {
         try {
             $this->db->createCommand()->dropForeignKey($name, $table)->execute();
@@ -220,7 +220,7 @@ class ImportFiasComponent extends FiasComponent
      * @param $name
      * @param $table
      */
-    private function dropIndexIfExists($name, $table)
+    protected function dropIndexIfExists($name, $table)
     {
         try {
             $this->db->createCommand()->dropIndex($name, $table)->execute();
@@ -234,7 +234,7 @@ class ImportFiasComponent extends FiasComponent
      * @param $table
      *
      */
-    private function dropPrimaryKeyIfExists($name, $table)
+    protected function dropPrimaryKeyIfExists($name, $table)
     {
         try {
             $this->db->createCommand()->dropPrimaryKey($name, $table)->execute();
@@ -245,7 +245,7 @@ class ImportFiasComponent extends FiasComponent
 
 
 
-    private function dropData()
+    protected function dropData()
     {
         FiasAddressObjectLevel::deleteAll();
         FiasAddressObject::deleteAll();

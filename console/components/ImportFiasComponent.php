@@ -245,13 +245,15 @@ class ImportFiasComponent extends FiasComponent
     }
 
 
-
+    /**
+     * @throws Exception
+     */
     protected function dropData()
     {
-        FiasAddressObjectLevel::deleteAll();
-        FiasAddressObject::deleteAll();
-        FiasHouse::deleteAll();
-        FiasUpdateLog::deleteAll();
+        $this->db->createCommand('TRUNCATE TABLE {{%fias_address_object_level}}')->execute();
+        $this->db->createCommand('TRUNCATE TABLE {{%fias_address_object}}')->execute();
+        $this->db->createCommand('TRUNCATE TABLE {{%fias_house}}')->execute();
+        $this->db->createCommand('TRUNCATE TABLE {{%fias_update_log}}')->execute();
     }
 
 }

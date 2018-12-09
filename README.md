@@ -3,6 +3,15 @@
 
 Модуль fias предназначен для работы с государственным адресным реестром http://fias.nalog.ru/ 
 
+Отличия форка от оригинального модуля
+-------------------------------------
+
+1. Работает только с MySQL (используются операторы REPLACE INTO, TRUNCATE TABLE).
+2. Добавлена возможность настроить отдельное подключение к БД в настройках модуля.
+3. Обновления применяются последовательно от версии к версии.
+4. Компоненты, выполняющие импорт, внеряются в модуль, т.е. могут быть переопределены. См. конфигурвцию модуля.
+5. Добавлено окружение на docker для тестирования и функциональные тесты на команды установки/обновления ФИАС.
+
 
 Структура модуля
 -------------------
@@ -43,13 +52,49 @@
     
 ````
     'modules' => [
-        ....
-            'fias' => [
-                'class' => 'solbianca\fias\Module',
-            ],
+        'fias' => [
+            'class' => \solbianca\fias\Module::class,
+            'components' => [
+                'loader' => [
+                    'class' => \solbianca\fias\console\base\Loader::class,
+                ],
+                'importFias' => [
+                    'class' => \solbianca\fias\console\components\ImportFiasComponent::class,
+                ],
+                'updateFias' => [
+                    'class' => \solbianca\fias\console\components\UpdateFiasComponent::class
+                ]
+            ]
+        ],
         ....
     ],
-````  
+```` 
+
+Насройка отдельного подключения к БД:
+
+````
+    'modules' => [
+        'fias' => [
+            'class' => \solbianca\fias\Module::class,
+            'components' => [
+                'loader' => [
+                    'class' => \solbianca\fias\console\base\Loader::class,
+                ],
+                'importFias' => [
+                    'class' => \solbianca\fias\console\components\ImportFiasComponent::class,
+                ],
+                'updateFias' => [
+                    'class' => \solbianca\fias\console\components\UpdateFiasComponent::class
+                ],
+                'db' => [
+                    'class' => \yii\db\Connection::class
+                ]
+            ]
+        ],
+        ....
+    ],
+
+````
 
 Задать карту контроллеров:
 
@@ -67,10 +112,21 @@
 ````
     'modules' => [
         ....
-            'fias' => [
-                'class' => '\path\to\Module',
-                'directory' => path/to/directory
-            ],
+        'fias' => [
+            'class' => \solbianca\fias\Module::class,
+            'components' => [
+                'loader' => [
+                    'class' => \solbianca\fias\console\base\Loader::class,
+                    'fileDirectory' => '@path_alias/to/directory'
+                ],
+                'importFias' => [
+                    'class' => \console\components\ImportFiasComponent::class
+                ],
+                'updateFias' => [
+                    'class' => \solbianca\fias\console\components\UpdateFiasComponent::class
+                ]
+            ]
+        ],
         ....
     ],
 ````
@@ -110,5 +166,20 @@
 <?= app\modules\fias\widgets\autocomplete\Autocomplete::widget() ?>
 ````
 
-TO DO
------------------------
+Запуск тестов
+-------------
+
+Перед запуском необходимо установить docker и docker-compose.
+
+
+```bash
+
+./app.sh
+
+docker-compose exec -u www-data php bash
+
+./yii migrate
+
+./vendor/bin/codecept run
+
+```

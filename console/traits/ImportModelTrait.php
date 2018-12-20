@@ -60,11 +60,6 @@ trait ImportModelTrait
         }
     }
 
-    protected static function saveInFile($filename, $data)
-    {
-        return file_put_contents($filename, $data);
-    }
-
     /**
      * After import callback
      */

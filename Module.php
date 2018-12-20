@@ -2,7 +2,7 @@
 
 namespace solbianca\fias;
 
-use Yii;
+
 
 /**
  * Class Module
@@ -12,22 +12,6 @@ use Yii;
  */
 class Module extends \yii\base\Module
 {
-    /**
-     * Directory for fias files
-     *
-     * @var string
-     */
-    private $directory;
-
-    /**
-     * @inherit
-     */
-    public function init()
-    {
-        parent::init();
-
-        $this->directory = Yii::getAlias('@app/runtime/fias');
-    }
 
     /**
      * @return string
@@ -44,4 +28,5 @@ class Module extends \yii\base\Module
     {
         $this->directory = $value;
     }
+
 }

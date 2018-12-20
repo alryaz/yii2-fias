@@ -2,7 +2,7 @@
 namespace solbianca\fias\console\base;
 
 use solbianca\fias\helpers\FileHelper;
-use solbianca\fias\models\FiasUpdateLog;
+use yii\base\Component;
 
 /**
  * Class Loader
@@ -10,42 +10,40 @@ use solbianca\fias\models\FiasUpdateLog;
  *
  * Обертка для загрузки базы на сервер
  */
-class Loader
+class Loader extends Component
 {
     /**
      * @var string
      */
-    protected $wsdlUrl;
+    public $wsdlUrl = 'http://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL';
 
     /**
      * Directory to upload file
      * @var string
      */
-    protected $fileDirectory;
+    public $fileDirectory = '@app/runtime/fias';
 
     /**
      * @var SoapResultWrapper
      */
-    protected $fileInfoResult = null;
+    protected $fileInfoResult;
 
     /**
      * @var SoapResultWrapper
      */
-    protected $allFilesInfoResult = null;
+    protected $allFilesInfoResult = [];
 
     /**
-     * @param $wsdlUrl
-     * @param $fileDirectory
      * @throws \yii\base\InvalidConfigException
      */
-    public function __construct($wsdlUrl, $fileDirectory)
+    public function init()
     {
-        $this->wsdlUrl = $wsdlUrl;
-        $this->fileDirectory = $fileDirectory;
-
-        FileHelper::ensureIsDirectory($fileDirectory);
-        FileHelper::ensureIsWritable($fileDirectory);
+        parent::init();
+        $this->fileDirectory = \Yii::getAlias($this->fileDirectory);
+        FileHelper::ensureIsDirectory($this->fileDirectory);
+        FileHelper::ensureIsWritable($this->fileDirectory);
     }
+
 
     /**
      * Get actual fias base information: version and url's to download files
@@ -107,9 +105,13 @@ class Loader
 
     /**
      * @param $path
+     *
+     * @param $version
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
-    protected function wrap($path)
+    protected function wrap($path, $version)
     {
         $pathToDirectory = glob($path . '_*');
         if ($pathToDirectory) {
@@ -117,17 +119,17 @@ class Loader
         } else {
             $pathToDirectory = Dearchiver::extract($this->fileDirectory, $path);
         }
-        $this->addVersionId($pathToDirectory);
+        $this->addVersionId($pathToDirectory, $version);
 
         return new Directory($pathToDirectory);
     }
 
     /**
      * @param $pathToDirectory
+     * @param $versionId
      */
-    protected function addVersionId($pathToDirectory)
+    protected function addVersionId($pathToDirectory, $versionId)
     {
-        $versionId = $this->getLastFileInfo()->getVersionId();
         file_put_contents($pathToDirectory . '/VERSION_ID_' . $versionId, 'Версия: ' . $versionId);
     }
 
@@ -170,39 +172,49 @@ class Loader
 
     /**
      * @param SoapResultWrapper $filesInfo
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
     public function loadInitFile(SoapResultWrapper $filesInfo)
     {
-        return $this->load($filesInfo->getInitFileName(), $filesInfo->getInitFileUrl());
+        return $this->load($filesInfo->getInitFileName(), $filesInfo->getInitFileUrl(), $filesInfo->getVersionId());
     }
 
     /**
      * @param SoapResultWrapper $filesInfo
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
     public function loadUpdateFile(SoapResultWrapper $filesInfo)
     {
-        return $this->load($filesInfo->getUpdateFileName(), $filesInfo->getUpdateFileUrl());
+        return $this->load($filesInfo->getUpdateFileName(), $filesInfo->getUpdateFileUrl(), $filesInfo->getVersionId());
     }
 
     /**
      * @param string $filename
      * @param string $url
+     *
+     * @param $version
+     *
      * @return Directory
+     * @throws \yii\base\InvalidConfigException
      */
-    private function load($filename, $url)
+    private function load($filename, $url, $version)
     {
         return $this->wrap(
-            $this->loadFile($filename, $url)
+            $this->loadFile($filename, $url),
+            $version
         );
     }
 
-    public function wrapFile($file)
-    {
-        return $this->wrap($file);
-    }
-
+    /**
+     * @param $pathToDirectory
+     *
+     * @return Directory
+     * @throws \yii\base\InvalidConfigException
+     */
     public function wrapDirectory($pathToDirectory)
     {
         return new Directory($pathToDirectory);
@@ -212,14 +224,14 @@ class Loader
      * Get ALL fias base updates information: version and url's to download files
      *
      * @param int $fromVersion
-     * @return array
+     * @return SoapResultWrapper[]
      */
     public function getAllFilesInfo($fromVersion = 0)
     {
-        if (!$this->allFilesInfoResult) {
-            $this->allFilesInfoResult = $this->getAllFilesInfoRaw($fromVersion);
+        if (!isset($this->allFilesInfoResult[$fromVersion])) {
+            $this->allFilesInfoResult[$fromVersion] = $this->getAllFilesInfoRaw($fromVersion);
         }
-        return $this->allFilesInfoResult;
+        return $this->allFilesInfoResult[$fromVersion];
     }
     /**
      * Получает список всех версий, выпущенных после имеющейся у нас
@@ -240,6 +252,26 @@ class Loader
             $updates[] = new SoapResultWrapper($update);
         }
         return $updates;
+    }
+
+    public function getVersionFileInfo($version = null)
+    {
+
+        if (null === $version) {
+            return $this->getLastFileInfo();
+        }
+
+        $allFilesInfo = $this->getAllFilesInfo();
+
+        foreach ($allFilesInfo as $info) {
+
+            if ($info->getVersionId() == $version) {
+                return $info;
+            }
+        }
+
+        throw new \DomainException('Версия не найдена.');
+
     }
 
 }

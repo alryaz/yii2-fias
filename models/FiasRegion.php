@@ -2,6 +2,7 @@
 
 namespace solbianca\fias\models;
 
+use solbianca\fias\Module;
 use yii\db\ActiveRecord;
 
 /**
@@ -51,4 +52,14 @@ class FiasRegion extends ActiveRecord
     {
         return $this->hasMany(FiasAddressObject::className(), ['region_code' => 'code']);
     }
+
+    /**
+     * @return null|object|\yii\db\Connection
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function getDb()
+    {
+        return Module::getInstance()->get('db');
+    }
+
 }

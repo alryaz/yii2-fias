@@ -17,7 +17,9 @@ class Dearchiver
      *
      * @param $pathToFileDirectory
      * @param $pathToFile
+     *
      * @return string
+     * @throws \Exception
      */
     public static function extract($pathToFileDirectory, $pathToFile)
     {
@@ -33,6 +35,8 @@ class Dearchiver
      *
      * @param $pathToFileDirectory
      * @param $pathToFile
+     *
+     * @throws \yii\base\InvalidConfigException
      */
     private static function checkPaths($pathToFileDirectory, $pathToFile)
     {

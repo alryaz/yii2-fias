@@ -121,7 +121,7 @@ class Directory
         }
 
         if ($isIndispensable) {
-            throw new Exception('Файл с префиксом ' . $prefix . ' не найден в директории: ' . $this->directoryPath);
+            throw new Exception('Файл с префиксом ' . $prefix . ' не найден в каталоге: ' . $this->directoryPath);
         }
 
         return null;

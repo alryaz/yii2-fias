@@ -17,6 +17,8 @@ trait DeleteModelTrait
 {
     /**
      * @param XmlReader $reader
+     *
+     * @throws InvalidConfigException
      */
     public static function remove(XmlReader $reader)
     {

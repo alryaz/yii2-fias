@@ -13,6 +13,16 @@ class XmlReader
     private $attributes = [];
     private $filters = [];
 
+    /**
+     * XmlReader constructor.
+     *
+     * @param $pathToFile
+     * @param $nodeName
+     * @param array $attributes
+     * @param array $filters
+     *
+     * @throws InvalidConfigException
+     */
     public function __construct($pathToFile, $nodeName, array $attributes, array $filters = [])
     {
         $this->nodeName = $nodeName;
@@ -22,6 +32,11 @@ class XmlReader
         $this->initializeReader($pathToFile);
     }
 
+    /**
+     * @param $pathToFile
+     *
+     * @throws InvalidConfigException
+     */
     private function initializeReader($pathToFile)
     {
         FileHelper::ensureIsReadable($pathToFile);
@@ -33,6 +48,12 @@ class XmlReader
             throw new InvalidConfigException('Ошибка открытия XML файла по адресу: ' . $pathToFile);
         }
     }
+
+    public function __destruct()
+    {
+        $this->reader->close();
+    }
+
 
     public function getRows($maxCount = 1000)
     {

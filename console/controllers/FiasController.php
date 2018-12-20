@@ -1,13 +1,14 @@
 <?php
+
 namespace solbianca\fias\console\controllers;
 
 use solbianca\fias\console\base\Loader;
+use solbianca\fias\console\components\ImportFiasComponent;
+use solbianca\fias\console\components\UpdateFiasComponent;
 use solbianca\fias\helpers\FileHelper;
-use solbianca\fias\console\models\ImportModel;
-use solbianca\fias\console\models\UpdateModel;
-use Yii;
+use solbianca\fias\Module;
 use yii\console\Controller;
-use yii\console\Exception;
+use yii\di\Instance;
 use yii\helpers\Console;
 
 class FiasController extends Controller
@@ -17,49 +18,48 @@ class FiasController extends Controller
      * If given parameter $file is null try to download full file, else try to use given file.
      *
      * @param string|null $file
-     * @throws Exception
-     * @throws \Exception
+     *
+     * @param null $version
+     *
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\console\Exception
      * @throws \yii\db\Exception
      */
-    public function actionInstall($file = null)
+    public function actionInstall($file = null, $version = null)
     {
-        $loader = $this->getLoader();
-
-        return (new ImportModel($loader, $file))->run();
+        /** @var ImportFiasComponent $import */
+        $import = Instance::ensure('importFias', ImportFiasComponent::class, Module::getInstance());
+        $import->import($file, $version);
     }
 
     /**
      * Update fias data in base
      *
-     * @param string|null $file
-     * @throws \Exception
+     * @param null|int $fromVersion
+     *
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\console\Exception
      * @throws \yii\db\Exception
      */
-    public function actionUpdate($file = null)
+    public function actionUpdate($fromVersion = null)
     {
-        $loader = $this->getLoader();
-
-        return (new UpdateModel($loader, $file))->run();
+        /** @var UpdateFiasComponent $update */
+        $update = Instance::ensure('updateFias', UpdateFiasComponent::class, Module::getInstance());
+        $update->update($fromVersion);
     }
 
     /**
+     * @throws \yii\base\InvalidConfigException
      * Clear directory for upload/extract files
      */
     public function actionClearDirectory()
     {
-        $directory = Yii::$app->getModule('fias')->directory;
+        /** @var Loader $loader */
+        $loader    = Instance::ensure('loader', Loader::class, Module::getInstance());
+        $directory = $loader->fileDirectory;
         FileHelper::clearDirectory($directory);
-        Console::output("Очистка директории '{$directory}' завершена.");
+        Console::output("Очистка каталога '{$directory}' завершена.");
+
     }
 
-    /**
-     * @return Loader
-     */
-    protected function getLoader()
-    {
-        return new Loader(
-            'http://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL',
-            Yii::$app->getModule('fias')->directory
-        );
-    }
 }

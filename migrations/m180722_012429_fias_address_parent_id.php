@@ -21,6 +21,7 @@ class m180722_012429_fias_address_parent_id extends Migration
      */
     public function safeDown()
     {
+        $this->delete('{{%fias_address_object}}', 'parent_id IS NULL');
         $this->alterColumn('{{%fias_address_object}}', 'parent_id',
             $this->char(36)->notNull()->comment('Идентификационный код родительского адресного объекта'));
     }

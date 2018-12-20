@@ -163,7 +163,7 @@
 Для того что бы использовать виджет необходимо в нужном файле представления прописать:
 
 ````
-<?= app\modules\fias\widgets\autocomplete\Autocomplete::widget() ?>
+<?= solbianca\fias\widgets\autocomplete\Autocomplete::widget() ?>
 ````
 
 Запуск тестов

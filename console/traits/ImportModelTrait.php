@@ -12,8 +12,6 @@ use solbianca\fias\console\base\XmlReader;
  */
 trait ImportModelTrait
 {
-    protected static $importFile = 'import.csv';
-
     /**
      * @param XmlReader $reader
      * @param array|null $attributes
@@ -42,20 +40,20 @@ trait ImportModelTrait
     {
         $count = 0;
         $tableName = static::tableName();
-        $values = implode(', ', array_values($attributes));
-        $pathToFile = $directory . DIRECTORY_SEPARATOR . static::$importFile;
-        $pathToFile = str_replace('\\', '/', $pathToFile);
+        $attributes = array_values($attributes);
 
         while ($data = $reader->getRows()) {
             $rows = [];
             foreach ($data as $row) {
-                $rows[] = implode("\t", array_values($row));
+                $row = array_combine($attributes, array_values($row));
+                if (!empty(array_filter($row))) {
+                    $rows[] = $row;
+                }
             }
-            if ($rows) {
-                $rows = implode("\n", $rows);
-                static::saveInFile($pathToFile, $rows);
+            if (!empty($rows)) {
                 $count += static::getDb()
-                    ->createCommand("LOAD DATA LOCAL INFILE '{$pathToFile}' INTO TABLE {$tableName} ({$values})")
+                    ->createCommand()
+                    ->batchInsert($tableName, $attributes, $rows)
                     ->execute();
                 Console::output("Inserted {$count} rows");
             }

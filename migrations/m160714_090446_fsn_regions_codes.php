@@ -120,8 +120,17 @@ class m160714_090446_fsn_regions_codes extends Migration
 
     public function down()
     {
-        $this->dropForeignKey('fk_region_code_ref_fias_region', '{{%fias_address_object}}');
-        $this->dropIndex('region_code', '{{%fias_address_object}}');
+        try {
+            $this->dropForeignKey('fk_region_code_ref_fias_region', '{{%fias_address_object}}');
+        } catch(Exception $e) {
+            Console::output('FK Drop Exception: ' . $e->getMessage());
+        }
+        
+        try {
+            $this->dropIndex('region_code', '{{%fias_address_object}}');
+        } catch(Exception $e) {
+            Console::output('Index Drop Exception: ' . $e->getMessage());
+        }
 
         $this->renameColumn('{{%fias_address_object}}', 'region_code', 'region');
         $this->renameColumn('{{%fias_region}}', 'code', 'id');
